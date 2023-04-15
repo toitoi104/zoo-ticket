@@ -53,6 +53,7 @@ class Calculator extends App
         $this->dateTime = (isset($options['dateTime']) ? new DateTime($options['dateTime']) : new DateTime());
     }
 
+    /** @throws Exception */
     private function calc(): void
     {
         $sumPerson = $this->adult->getPerson() + $this->child->getPerson() + $this->senior->getPerson();
@@ -62,14 +63,16 @@ class Calculator extends App
         $holidayCharge = $this->chargeHoliday($sumPerson);
         $sumDiscount = $this->sumDiscount($sumGenerallyCost, $sumPerson);
 
-        $calcCost = $defaultCost + $holidayCharge - $sumDiscount;
+        $sumCost = $defaultCost + $holidayCharge - $sumDiscount;
+
+        $this->validateResult($sumPerson, $sumCost);
 
         $this->writeResult("■人数");
         $this->writeResult("{$this->adult->getName()}:{$this->adult->getPerson()}名");
         $this->writeResult("{$this->child->getName()}:{$this->child->getPerson()}名");
         $this->writeResult("{$this->senior->getName()}:{$this->senior->getPerson()}名");
         $this->writeResult("合計：{$sumPerson}名");
-        $this->writeResult("■販売合計金額：".number_format($calcCost));
+        $this->writeResult("■販売合計金額：".number_format($sumCost));
         $this->writeResult("■金額変更前合計金額：".number_format($sumGenerallyCost));
         $this->writeResult("■金額変更明細");
         $this->writeResult($this->changedCostMessage);
@@ -175,6 +178,18 @@ class Calculator extends App
         }
 
         return 0;
+    }
+
+    /** @throws Exception */
+    private function validateResult(int $sumPerson, int $sumCost): void
+    {
+        if($sumPerson <= 0){
+            throw new Exception('人数を設定してください。');
+        }
+
+        if($sumCost < 0){
+            throw new Exception("合計金額が0円以下になっています。エンジニアに連絡をしてください。({$sumPerson}円)");
+        }
     }
 
     private function showResult(): void

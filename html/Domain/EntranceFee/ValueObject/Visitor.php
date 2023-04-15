@@ -9,9 +9,19 @@ class Visitor
     protected int $specialCost; // 特別料金
     protected int $person; // 人数
 
+    /** @throws Exception */
     public function __construct(int $person)
     {
+        $this->validate($person);
         $this->person = $person;
+    }
+
+    /** @throws Exception */
+    private function validate(int $person): void
+    {
+        if($person < 0){
+            throw new Exception('人数にマイナスを設定することはできません');
+        }
     }
 
     public function getName(): string
