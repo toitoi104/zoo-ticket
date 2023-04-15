@@ -16,6 +16,7 @@ class Calculator extends App
     private bool $isHoliday = false; // 祝日フラグ
     private string $resultMessage = ''; // 計算結果
     private string $changedCostMessage = ''; // 金額変更明細
+    private DateTime $dateTime; // 日時
 
     /**
      * @throws Exception
@@ -33,11 +34,12 @@ class Calculator extends App
     private function init(): void
     {
         $options  = [
-            "ticket_type:",   // チケットタイプ（通常 or 特別）
-            "adult:",  // 大人の人数
-            "child:",  //　子供の人数
-            "senior:",  //　シニアの人数
+            "ticket_type:", // チケットタイプ（通常 or 特別）
+            "adult:",       // 大人の人数
+            "child:",       //　子供の人数
+            "senior:",      //　シニアの人数
             "is_holiday",  //　祝日かどうか
+            "dateTime:"     // 日時(テスト用)
         ];
 
         $options = getopt('', $options);
@@ -48,6 +50,7 @@ class Calculator extends App
         $this->child = new Child(isset($options['child']) ? (int) $options['child'] : 0);
         $this->senior = new Senior(isset($options['senior']) ? (int) $options['senior'] : 0);
         $this->isHoliday = isset($options['is_holiday']);
+        $this->dateTime = (isset($options['dateTime']) ? new DateTime($options['dateTime']) : new DateTime());
     }
 
     private function calc(): void
@@ -93,7 +96,7 @@ class Calculator extends App
      */
     private function chargeHoliday(int $sumPerson): int
     {
-        if($this->isHoliday || in_array(date('w'), [0, 6])){
+        if($this->isHoliday || in_array($this->dateTime->format('w'), [0, 6])){
             $perCharge = 200;
             $charge = $sumPerson * $perCharge;
             $this->writeChangedCostMessage("休日割増料金", $charge, "1人あたり{$perCharge}円");
@@ -147,7 +150,7 @@ class Calculator extends App
             return 0;
         }
 
-        if((int) date('H') >= 17){
+        if((int) $this->dateTime->format('H') >= 17){
             $perDiscount = 100;
             $discount = $sumPerson * $perDiscount;
             $this->writeChangedCostMessage("夕方割引", $discount, "1人あたり{$perDiscount}円");
@@ -165,7 +168,7 @@ class Calculator extends App
      */
     private function discountWeek(int $sumPerson): int
     {
-        if(!$this->isHoliday && in_array(date('w'), [1, 3])){
+        if(!$this->isHoliday && in_array($this->dateTime->format('w'), [1, 3])){
             $perDiscount = 100;
             $discount = $sumPerson * $perDiscount;
             $this->writeChangedCostMessage("曜日割引", $discount, "1人あたり{$perDiscount}円");
