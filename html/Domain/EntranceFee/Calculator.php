@@ -39,7 +39,7 @@ class Calculator extends App
             "child:",       //　子供の人数
             "senior:",      //　シニアの人数
             "is_holiday",  //　祝日かどうか
-            "dateTime:"     // 日時(テスト用)
+            "date_time:"     // 日時(テスト用)
         ];
 
         $options = getopt('', $options);
@@ -50,7 +50,7 @@ class Calculator extends App
         $this->child = new Child(isset($options['child']) ? (int) $options['child'] : 0);
         $this->senior = new Senior(isset($options['senior']) ? (int) $options['senior'] : 0);
         $this->isHoliday = isset($options['is_holiday']);
-        $this->dateTime = (isset($options['dateTime']) ? new DateTime($options['dateTime']) : new DateTime());
+        $this->dateTime = (isset($options['date_time']) ? new DateTime($options['date_time']) : new DateTime());
     }
 
     /** @throws Exception */
@@ -62,7 +62,6 @@ class Calculator extends App
 
         $holidayCharge = $this->chargeHoliday($sumPerson);
         $sumDiscount = $this->sumDiscount($sumGenerallyCost, $sumPerson);
-
         $sumCost = $defaultCost + $holidayCharge - $sumDiscount;
 
         $this->validateResult($sumPerson, $sumCost);
@@ -72,8 +71,8 @@ class Calculator extends App
         $this->writeResult("{$this->child->getName()}:{$this->child->getPerson()}名");
         $this->writeResult("{$this->senior->getName()}:{$this->senior->getPerson()}名");
         $this->writeResult("合計：{$sumPerson}名");
-        $this->writeResult("■販売合計金額：".number_format($sumCost));
-        $this->writeResult("■金額変更前合計金額：".number_format($sumGenerallyCost));
+        $this->writeResult("■販売合計金額：".number_format($sumCost)."円");
+        $this->writeResult("■金額変更前合計金額：".number_format($sumGenerallyCost)."円");
         $this->writeResult("■金額変更明細");
         $this->writeResult($this->changedCostMessage);
     }
@@ -85,7 +84,7 @@ class Calculator extends App
 
     private function calcDefaultCost(int $sumGenerallyCost): int
     {
-        if($this->ticketType->getValue() !== TicketTypeEnum::SPECIAL->value){
+        if($this->ticketType->getValue() === TicketTypeEnum::SPECIAL->value){
             return $this->adult->sumSpecialCost() + $this->child->sumSpecialCost() + $this->senior->sumSpecialCost();
         }
 
