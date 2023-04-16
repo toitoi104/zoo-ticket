@@ -29,4 +29,13 @@ class TicketType
     {
         return $this->value;
     }
+
+    public function getTicketTypeName(): string
+    {
+        return match ($this->getValue()) {
+            TicketTypeEnum::GENERALLY->value => TicketTypeEnum::GENERALLY->name(),
+            TicketTypeEnum::SPECIAL->value => TicketTypeEnum::SPECIAL->name(),
+            default => throw new Exception('TicketTypeEnumの値が設定されていません')
+        };
+    }
 }
