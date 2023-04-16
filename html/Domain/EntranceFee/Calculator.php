@@ -61,7 +61,7 @@ class Calculator extends App
         $sumCost = $defaultCost + $holidayCharge - $sumDiscount;
 
         $this->validateResult($sumPerson, $sumCost);
-        $this->whiteResults($sumPerson, $sumCost, $sumGenerallyCost);
+        $this->writeResults($sumPerson, $sumCost, $defaultCost);
     }
 
     private function sumGenerallyCost(): int
@@ -88,7 +88,7 @@ class Calculator extends App
         if($this->isHoliday || in_array($this->dateTime->format('w'), [0, 6])){
             $perCharge = 200;
             $charge = $sumPerson * $perCharge;
-            $this->writeChangedCostMessage("休日割増料金", $charge, "1人あたり{$perCharge}円");
+            $this->writeChangedCostMessage("休日割増料金", $charge, "1人{$perCharge}円 × {$sumPerson}名");
 
             return $charge;
         }
@@ -130,7 +130,7 @@ class Calculator extends App
         if((int) $this->dateTime->format('H') >= 17){
             $perDiscount = 100;
             $discount = $sumPerson * $perDiscount;
-            $this->writeChangedCostMessage("夕方割引", -$discount, "1人あたり{$perDiscount}円");
+            $this->writeChangedCostMessage("夕方割引", -$discount, "{$perDiscount}円 × {$sumPerson}名");
 
             return $discount;
         }
@@ -148,7 +148,7 @@ class Calculator extends App
         if(!$this->isHoliday && in_array($this->dateTime->format('w'), [1, 3])){
             $perDiscount = 100;
             $discount = $sumPerson * $perDiscount;
-            $this->writeChangedCostMessage("曜日割引", -$discount, "1人あたり{$perDiscount}円");
+            $this->writeChangedCostMessage("曜日割引", -$discount, "{$perDiscount}円 * {$sumPerson}名");
 
             return $discount;
         }
@@ -169,15 +169,15 @@ class Calculator extends App
     }
 
     /** @throws Exception */
-    private function whiteResults(int $sumPerson, int $sumCost, int $sumGenerallyCost): void
+    private function writeResults(int $sumPerson, int $sumCost, int $defaultCost): void
     {
         $this->writeResult("■販売合計金額：".number_format($sumCost)."円");
-        $this->writeResult("■金額変更前合計金額：".number_format($sumGenerallyCost)."円");
+        $this->writeResult("■金額変更前合計金額：".number_format($defaultCost)."円");
         $this->writeResult("■金額変更明細");
         $this->writeResult("チケットタイプ：".$this->ticketType->getTicketTypeName());
         $this->writeResult($this->changedCostMessage);
 
-        $this->writeResult("\n■人数");
+        $this->writeResult("■人数");
         $this->writeResult("{$this->adult->getName()}:{$this->adult->getPerson()}名"."(通常料金：{$this->adult->getGenerallyCost()}円、特別料金：{$this->adult->getSpecialCost()}円)");
         $this->writeResult("{$this->child->getName()}:{$this->child->getPerson()}名"."(通常料金：{$this->child->getGenerallyCost()}円、特別料金：{$this->child->getSpecialCost()}円)");
         $this->writeResult("{$this->senior->getName()}:{$this->senior->getPerson()}名"."(通常料金：{$this->senior->getGenerallyCost()}円、特別料金：{$this->senior->getSpecialCost()}円)");
