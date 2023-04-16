@@ -18,9 +18,7 @@ class Calculator extends App
     private string $changedCostMessage = ''; // 金額変更明細
     private DateTime $dateTime; // 日時
 
-    /**
-     * @throws Exception
-     */
+    /** @throws Exception */
     protected function main(): void
     {
         $this->init();
@@ -28,9 +26,7 @@ class Calculator extends App
         $this->showResult();
     }
 
-    /**
-     * @throws Exception
-     */
+    /** @throws Exception */
     private function init(): void
     {
         $options  = [
@@ -65,16 +61,7 @@ class Calculator extends App
         $sumCost = $defaultCost + $holidayCharge - $sumDiscount;
 
         $this->validateResult($sumPerson, $sumCost);
-
-        $this->writeResult("■人数");
-        $this->writeResult("{$this->adult->getName()}:{$this->adult->getPerson()}名");
-        $this->writeResult("{$this->child->getName()}:{$this->child->getPerson()}名");
-        $this->writeResult("{$this->senior->getName()}:{$this->senior->getPerson()}名");
-        $this->writeResult("合計：{$sumPerson}名");
-        $this->writeResult("■販売合計金額：".number_format($sumCost)."円");
-        $this->writeResult("■金額変更前合計金額：".number_format($sumGenerallyCost)."円");
-        $this->writeResult("■金額変更明細");
-        $this->writeResult($this->changedCostMessage);
+        $this->whiteResults($sumPerson, $sumCost, $sumGenerallyCost);
     }
 
     private function sumGenerallyCost(): int
@@ -131,16 +118,12 @@ class Calculator extends App
     {
         $sumGroupPerson = $this->adult->countGroupPerson() + $this->child->countGroupPerson() + $this->senior->countGroupPerson();
 
-        if($this->ticketType->getValue() !== TicketTypeEnum::GENERALLY->value){
-            return 0;
-        }
-
         if($sumGroupPerson < 10){
             return 0;
         }
 
         $discount = (int) floor($sumGenerallyCost * 10 / 100);
-        $this->writeChangedCostMessage("団体割引料金", $discount, "10%割引");
+        $this->writeChangedCostMessage("団体割引料金", -$discount, "10%割引");
 
         return $discount;
     }
@@ -155,7 +138,7 @@ class Calculator extends App
         if((int) $this->dateTime->format('H') >= 17){
             $perDiscount = 100;
             $discount = $sumPerson * $perDiscount;
-            $this->writeChangedCostMessage("夕方割引", $discount, "1人あたり{$perDiscount}円");
+            $this->writeChangedCostMessage("夕方割引", -$discount, "1人あたり{$perDiscount}円");
 
             return $discount;
         }
@@ -173,7 +156,9 @@ class Calculator extends App
         if(!$this->isHoliday && in_array($this->dateTime->format('w'), [1, 3])){
             $perDiscount = 100;
             $discount = $sumPerson * $perDiscount;
-            $this->writeChangedCostMessage("曜日割引", $discount, "1人あたり{$perDiscount}円");
+            $this->writeChangedCostMessage("曜日割引", -$discount, "1人あたり{$perDiscount}円");
+
+            return $discount;
         }
 
         return 0;
@@ -183,17 +168,28 @@ class Calculator extends App
     private function validateResult(int $sumPerson, int $sumCost): void
     {
         if($sumPerson <= 0){
-            throw new Exception('人数を設定してください。');
+            throw new Exception('人数を設定してください。人数は半角数字で入力してください。');
         }
 
         if($sumCost < 0){
-            throw new Exception("合計金額が0円以下になっています。エンジニアに連絡をしてください。({$sumPerson}円)");
+            throw new Exception("合計金額が0円以下になっています。エンジニアに連絡をしてください({$sumPerson}円)。");
         }
     }
 
-    private function showResult(): void
+    /** @throws Exception */
+    private function whiteResults(int $sumPerson, int $sumCost, int $sumGenerallyCost): void
     {
-        echo $this->resultMessage;
+        $this->writeResult("■販売合計金額：".number_format($sumCost)."円");
+        $this->writeResult("■金額変更前合計金額：".number_format($sumGenerallyCost)."円");
+        $this->writeResult("■金額変更明細");
+        $this->writeResult("チケットタイプ：".$this->ticketType->getTicketTypeName());
+        $this->writeResult($this->changedCostMessage);
+
+        $this->writeResult("\n■人数");
+        $this->writeResult("{$this->adult->getName()}:{$this->adult->getPerson()}名"."(通常料金：{$this->adult->getGenerallyCost()}円、特別料金：{$this->adult->getSpecialCost()}円)");
+        $this->writeResult("{$this->child->getName()}:{$this->child->getPerson()}名"."(通常料金：{$this->child->getGenerallyCost()}円、特別料金：{$this->child->getSpecialCost()}円)");
+        $this->writeResult("{$this->senior->getName()}:{$this->senior->getPerson()}名"."(通常料金：{$this->senior->getGenerallyCost()}円、特別料金：{$this->senior->getSpecialCost()}円)");
+        $this->writeResult("合計：{$sumPerson}名");
     }
 
     private function writeResult(string $v): void
@@ -205,5 +201,10 @@ class Calculator extends App
     {
         $sumPrice = number_format($sumPrice);
         $this->changedCostMessage .= "【{$name}】：{$sumPrice}円（{$memo}）"."\n";
+    }
+
+    private function showResult(): void
+    {
+        echo $this->resultMessage;
     }
 }

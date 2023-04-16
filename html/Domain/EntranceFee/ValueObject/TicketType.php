@@ -30,6 +30,7 @@ class TicketType
         return $this->value;
     }
 
+    /** @throws Exception */
     public function getTicketTypeName(): string
     {
         return match ($this->getValue()) {

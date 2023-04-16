@@ -20,7 +20,7 @@ class Visitor
     private function validate(int $person): void
     {
         if($person < 0){
-            throw new Exception('人数にマイナスを設定することはできません');
+            throw new Exception('人数にマイナスを設定することはできません。人数は半角数字で入力してください。');
         }
     }
 
