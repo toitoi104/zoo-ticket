@@ -53,29 +53,23 @@ class Calculator extends App
     private function calc(): void
     {
         $sumPerson = $this->adult->getPerson() + $this->child->getPerson() + $this->senior->getPerson();
-        $sumGenerallyCost = $this->sumGenerallyCost();
-        $defaultCost = $this->calcDefaultCost($sumGenerallyCost);
+        $defaultCost = $this->calcDefaultCost();
 
         $holidayCharge = $this->chargeHoliday($sumPerson);
-        $sumDiscount = $this->sumDiscount($sumGenerallyCost, $sumPerson);
+        $sumDiscount = $this->sumDiscount($defaultCost, $sumPerson);
         $sumCost = $defaultCost + $holidayCharge - $sumDiscount;
 
         $this->validateResult($sumPerson, $sumCost);
         $this->writeResults($sumPerson, $sumCost, $defaultCost);
     }
 
-    private function sumGenerallyCost(): int
-    {
-        return $this->adult->sumGenerallyCost() + $this->child->sumGenerallyCost() + $this->senior->sumGenerallyCost();
-    }
-
-    private function calcDefaultCost(int $sumGenerallyCost): int
+    private function calcDefaultCost(): int
     {
         if($this->ticketType->getValue() === TicketTypeEnum::SPECIAL->value){
             return $this->adult->sumSpecialCost() + $this->child->sumSpecialCost() + $this->senior->sumSpecialCost();
         }
 
-        return $sumGenerallyCost;
+        return $this->adult->sumGenerallyCost() + $this->child->sumGenerallyCost() + $this->senior->sumGenerallyCost();
     }
 
     /**
