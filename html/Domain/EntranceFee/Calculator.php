@@ -98,10 +98,6 @@ class Calculator extends App
 
     private function sumDiscount(int $sumGenerallyCost, int $sumPerson): int
     {
-        if($this->ticketType->getValue() !== TicketTypeEnum::GENERALLY->value){
-            return 0;
-        }
-
         $groupDiscount = $this->discountGroup($sumGenerallyCost); // 団体割引
         $eveningDiscount = $this->discountEvening($sumPerson);    // 夕方割引
         $weekDiscount = $this->discountWeek($sumPerson);          // 曜日割引
@@ -131,10 +127,6 @@ class Calculator extends App
     // 夕方割引（17時以降は100円割引）
     private function discountEvening(int $sumPerson): int
     {
-        if($this->ticketType->getValue() !== TicketTypeEnum::GENERALLY->value){
-            return 0;
-        }
-
         if((int) $this->dateTime->format('H') >= 17){
             $perDiscount = 100;
             $discount = $sumPerson * $perDiscount;
